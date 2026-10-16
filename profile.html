@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Account & Profile - SwiftCart</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f5f3ff',
+                            100: '#ede9fe',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            700: '#6d28d9',
+                            800: '#5b21b6',
+                            900: '#4c1d95',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 antialiased min-h-screen flex flex-col font-sans">
+
+    <!-- 1. Header with Fast Switching to Both Store Pages -->
+    <header class="sticky top-0 z-40 bg-white border-b border-gray-100 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16 md:h-20 gap-4">
+                
+                <!-- Brand & Home link -->
+                <div class="flex items-center gap-3">
+                    <a href="swiftcart_app.html" class="flex items-center gap-2 group">
+                        <div class="bg-brand-700 text-white w-9 h-9 md:w-10 md:h-10 rounded-xl flex items-center justify-center font-black text-xl italic group-hover:bg-brand-800 transition-colors">
+                            S
+                        </div>
+                <!-- Navigation buttons connecting to the existing apps -->
+                <div class="flex items-center gap-2 md:gap-3">
+                    <!-- Link to Admin Operations Command Center -->
+                    <a href="admin_analytics.html" class="inline-flex items-center gap-1.5 px-3 py-2 text-xs md:text-sm font-semibold rounded-xl bg-slate-900 text-purple-300 hover:bg-slate-800 transition-all border border-slate-700" title="Dark Store & Fleet Telemetry">
+                        <i class="fas fa-chart-line text-purple-400"></i>
+                        <span>Ops Admin</span>
+                    </a>
+
+                    <!-- Link to Live Rider Tracking -->
+                    <a href="rider_tracking.html" class="inline-flex items-center gap-1.5 px-3 py-2 text-xs md:text-sm font-semibold rounded-xl bg-amber-50 text-amber-800 hover:bg-amber-100 transition-all border border-amber-200">
+                        <i class="fas fa-motorcycle text-amber-600 animate-pulse"></i>
+                        <span>Track Rider</span>
+                    </a>
+
+                    <!-- Link to SwiftCart Main App -->
+                    <a href="swiftcart_app.html" class="inline-flex items-center gap-1.5 px-3 py-2 text-xs md:text-sm font-semibold rounded-xl bg-purple-50 text-brand-700 hover:bg-brand-100 transition-all border border-brand-200">
+                        <i class="fas fa-bolt text-yellow-500"></i>
+                        <span>SwiftCart Store</span>
+                    </a>
+
+                    <!-- Link to QuickCart / Prototype Page -->
+                    <a href="index.html" class="inline-flex items-center gap-1.5 px-3 py-2 text-xs md:text-sm font-semibold rounded-xl bg-green-50 text-emerald-700 hover:bg-emerald-100 transition-all border border-emerald-200">
+                        <i class="fas fa-shopping-basket text-emerald-600"></i>
+                        <span class="hidden sm:inline">QuickCart</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 2. Main Container with Sidebar + Dynamic Tabs -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8 w-full">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-start">
+            
+            <!-- Left Column: User Profile Card & Navigation Tabs -->
+            <aside class="lg:col-span-4 bg-white rounded-2xl border border-gray-100 p-5 md:p-6 shadow-sm">
+                <!-- User Basic Details -->
+                <div class="flex items-center gap-4 pb-6 border-b border-gray-100">
+                    <div class="relative">
+                        <img id="avatar-preview" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80" alt="User Profile" class="w-16 h-16 rounded-full object-cover border-2 border-brand-500 p-0.5">
+                        <span class="absolute bottom-0 right-0 w-4 h-4 bg-green-500 border-2 border-white rounded-full" title="Active"></span>
+                    </div>
+                    <div class="flex-grow">
+                        <div class="flex items-center gap-1.5">
+                            <h2 id="sidebar-name" class="font-bold text-gray-900 text-lg leading-tight">Rohit Sharma</h2>
+                            <i class="fas fa-circle-check text-brand-600 text-sm" title="Verified Member"></i>
+                        </div>
+                        <p id="sidebar-phone" class="text-xs text-gray-500 mt-0.5">+91 98765 43210</p>
+                        <span class="inline-block mt-1 text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full">
+                            ★ VIP 10-Min Club
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Fast Balance & Order Counters -->
+                <div class="grid grid-cols-2 gap-3 my-5">
+                    <div class="bg-brand-50/70 p-3 rounded-xl border border-brand-100 text-center">
+                        <span class="text-[11px] font-bold text-brand-700 uppercase tracking-wider block">Wallet Balance</span>
+                        <span class="text-xl font-extrabold text-brand-900">₹340</span>
+                    </div>
+                    <div class="bg-gray-50 p-3 rounded-xl border border-gray-100 text-center">
+                        <span class="text-[11px] font-bold text-gray-500 uppercase tracking-wider block">Total Orders</span>
+                        <span class="text-xl font-extrabold text-gray-800">28</span>
+                    </div>
+                </div>
+
+                <!-- Navigation Tab Buttons -->
+                <nav class="space-y-1.5" id="nav-tabs">
+                    <button onclick="switchTab('orders')" id="btn-orders" class="tab-button w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold transition-all bg-brand-700 text-white shadow-sm">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-bag-shopping w-5 text-center"></i>
+                            <span>Orders & Reorder</span>
+                        </div>
+                        <i class="fas fa-chevron-right text-xs opacity-75"></i>
+                    </button>
+
+                    <button onclick="switchTab('addresses')" id="btn-addresses" class="tab-button w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-location-dot w-5 text-center text-gray-400"></i>
+                            <span>Saved Addresses</span>
+                        </div>
+                        <i class="fas fa-chevron-right text-xs opacity-75"></i>
+                    </button>
+
+                    <button onclick="switchTab('wallet')" id="btn-wallet" class="tab-button w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-wallet w-5 text-center text-gray-400"></i>
+                            <span>SwiftPay & Cards</span>
+                        </div>
+                        <i class="fas fa-chevron-right text-xs opacity-75"></i>
+                    </button>
+
+                    <button onclick="switchTab('settings')" id="btn-settings" class="tab-button w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-user-gear w-5 text-center text-gray-400"></i>
+                            <span>Profile Settings</span>
+                        </div>
+                        <i class="fas fa-chevron-right text-xs opacity-75"></i>
+                    </button>
+                </nav>
+
+                <!-- Help & Quick Return Box -->
+                <div class="mt-6 pt-5 border-t border-gray-100">
+                    <div class="bg-gradient-to-br from-purple-50 to-indigo-50 border border-brand-100 rounded-xl p-3.5">
+                        <div class="flex items-center gap-2 font-bold text-xs text-brand-900 mb-1">
+                            <i class="fas fa-headset text-brand-600"></i> Need instant help?
+                        </div>
+                        <p class="text-[12px] text-gray-600 mb-3">Our 24/7 dark store support is 1 tap away.</p>
+                        <button onclick="showToast('Customer support chat initiated!')" class="w-full bg-white hover:bg-brand-50 text-brand-700 border border-brand-200 text-xs font-bold py-2 rounded-lg transition-colors shadow-2xs">
+                            Chat with Support
+                        </button>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Right Column: Tab Content Area -->
+            <section class="lg:col-span-8 space-y-6">
+
+                <!-- TAB 1: ORDERS & REORDERS -->
+                <div id="tab-orders" class="tab-content bg-white rounded-2xl border border-gray-100 p-5 md:p-6 shadow-sm">
+                    <div class="flex items-center justify-between pb-4 border-b border-gray-100 mb-5">
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-900">Your Past Orders</h3>
+                            <p class="text-xs text-gray-500">Track past orders or reorder items with 1 click</p>
+                        </div>
+                        <span class="text-xs font-semibold bg-gray-100 text-gray-700 px-3 py-1 rounded-full">3 Recent Deliveries</span>
+                    </div>
+
+                    <div class="space-y-4">
+                        <!-- Order Card 1: Delivered -->
+                        <div class="border border-gray-100 hover:border-brand-200 rounded-xl p-4 transition-all bg-gray-50/50 hover:bg-white shadow-2xs">
+                            <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-gray-100">
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-bold text-sm text-gray-900">Order #SC-8924</span>
+                                        <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1">
+                                            <i class="fas fa-circle-check text-[10px]"></i> Delivered in 9 mins
+                                        </span>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-0.5">Today, 2:40 PM • Delivered to Vijay Nagar, Indore</p>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-sm font-extrabold text-gray-900">₹147</span>
+                                    <span class="block text-[10px] text-gray-400">Paid via UPI</span>
+                                </div>
+                            </div>
+
+                            <div class="py-3 flex items-center justify-between flex-wrap gap-2">
+                                <p class="text-xs text-gray-700">
+                                    <strong class="font-semibold text-gray-900">Items:</strong> Pure Cow Milk (500ml), Whole Wheat Bread (400g), Fresh Eggs (6 Pack)
+                                </p>
+                                <div class="flex gap-2">
+                                    <a href="rider_tracking.html" class="bg-amber-50 hover:bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1.5 rounded-lg border border-amber-200 transition-colors flex items-center gap-1">
+                                        <i class="fas fa-location-crosshairs text-[10px] text-amber-600"></i> Live Telemetry
+                                    </a>
+                                    <button onclick="triggerReorder(['Milk', 'Bread'])" class="bg-brand-50 hover:bg-brand-100 text-brand-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-brand-200 transition-colors flex items-center gap-1">
+                                        <i class="fas fa-rotate-right text-[10px]"></i> Reorder All
+                                    </button>
+                                    <button onclick="showToast('Invoice downloaded (PDF)')" class="text-gray-500 hover:text-gray-800 text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-gray-200 bg-white">
+                                        <i class="fas fa-receipt text-[10px]"></i> Invoice
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Order Card 2: Delivered -->
+                        <div class="border border-gray-100 hover:border-brand-200 rounded-xl p-4 transition-all bg-gray-50/50 hover:bg-white shadow-2xs">
+                            <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-gray-100">
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-bold text-sm text-gray-900">Order #SC-7719</span>
+                                        <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1">
+                                            <i class="fas fa-circle-check text-[10px]"></i> Delivered in 11 mins
+                                        </span>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-0.5">Yesterday, 8:15 PM • Delivered to Vijay Nagar, Indore</p>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-sm font-extrabold text-gray-900">₹95</span>
+                                    <span class="block text-[10px] text-gray-400">Paid via SwiftPay</span>
+                                </div>
+                            </div>
+
+                            <div class="py-3 flex items-center justify-between flex-wrap gap-2">
+                                <p class="text-xs text-gray-700">
+                                    <strong class="font-semibold text-gray-900">Items:</strong> Crispy Potato Chips (50g), Chilled Cola Drink (750ml)
+                                </p>
+                                <div class="flex gap-2">
+                                    <button onclick="triggerReorder(['Chips', 'Cola'])" class="bg-brand-50 hover:bg-brand-100 text-brand-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-brand-200 transition-colors flex items-center gap-1">
+                                        <i class="fas fa-rotate-right text-[10px]"></i> Reorder All
+                                    </button>
+                                    <button onclick="showToast('Invoice downloaded (PDF)')" class="text-gray-500 hover:text-gray-800 text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-gray-200 bg-white">
+                                        <i class="fas fa-receipt text-[10px]"></i> Invoice
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 2: SAVED ADDRESSES -->
+                <div id="tab-addresses" class="tab-content hidden bg-white rounded-2xl border border-gray-100 p-5 md:p-6 shadow-sm">
+                    <div class="flex items-center justify-between pb-4 border-b border-gray-100 mb-5">
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-900">Delivery Addresses</h3>
+                            <p class="text-xs text-gray-500">Pick where your 10-minute grocery packs arrive</p>
+                        </div>
+                        <button onclick="openAddressModal()" class="bg-brand-700 hover:bg-brand-800 text-white text-xs font-bold px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition-colors shadow-sm">
+                            <i class="fas fa-plus text-[10px]"></i> Add Address
+                        </button>
+                    </div>
+
+                    <div id="address-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Address 1: Home (Default) -->
+                        <div class="border-2 border-brand-600 rounded-xl p-4 bg-brand-50/20 relative flex flex-col justify-between">
+                            <span class="absolute top-3 right-3 text-[10px] font-extrabold bg-brand-600 text-white px-2 py-0.5 rounded-full">DEFAULT</span>
+                            <div>
+                                <div class="flex items-center gap-2 mb-1.5">
+                                    <i class="fas fa-house text-brand-700 text-sm"></i>
+                                    <h4 class="font-bold text-gray-900 text-sm">Home</h4>
+                                </div>
+                                <p class="text-xs text-gray-600 leading-relaxed">
+                                    Flat 402, Royal Palms Heights, Scheme 54, PU-4 Commercial Area, Vijay Nagar, Indore, Madhya Pradesh - 452010
+                                </p>
+                                <p class="text-[11px] text-gray-400 mt-2"><i class="fas fa-phone text-[10px]"></i> +91 98765 43210</p>
+                            </div>
+                            <div class="flex items-center gap-3 pt-3 mt-3 border-t border-brand-100 text-xs font-semibold text-brand-700">
+                                <button onclick="showToast('Address set as primary')" class="hover:underline">Use as Current</button>
+                                <span class="text-gray-300">•</span>
+                                <button onclick="showToast('Edit mode opened')" class="text-gray-500 hover:text-gray-800">Edit</button>
+                            </div>
+                        </div>
+
+                        <!-- Address 2: Office -->
+                        <div class="border border-gray-200 rounded-xl p-4 bg-white hover:border-gray-300 relative flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center gap-2 mb-1.5">
+                                    <i class="fas fa-briefcase text-gray-600 text-sm"></i>
+                                    <h4 class="font-bold text-gray-900 text-sm">Office / Work</h4>
+                                </div>
+                                <p class="text-xs text-gray-600 leading-relaxed">
+                                    Tower B, 3rd Floor, IT Park Square, Ring Road, Indore, MP - 452001
+                                </p>
+                                <p class="text-[11px] text-gray-400 mt-2"><i class="fas fa-phone text-[10px]"></i> +91 98765 43210</p>
+                            </div>
+                            <div class="flex items-center gap-3 pt-3 mt-3 border-t border-gray-100 text-xs font-semibold">
+                                <button onclick="showToast('Primary address switched to Work')" class="text-brand-700 hover:underline">Set as Default</button>
+                                <span class="text-gray-300">•</span>
+                                <button onclick="showToast('Edit mode opened')" class="text-gray-500 hover:text-gray-800">Edit</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 3: WALLET & SWIFTPAY -->
+                <div id="tab-wallet" class="tab-content hidden bg-white rounded-2xl border border-gray-100 p-5 md:p-6 shadow-sm">
+                    <div class="flex items-center justify-between pb-4 border-b border-gray-100 mb-5">
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-900">SwiftPay Wallet & Cards</h3>
+                            <p class="text-xs text-gray-500">Manage instant 1-tap checkout balance & saved methods</p>
+                        </div>
+                        <span class="text-xs font-extrabold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200">
+                            Instant Refunds Active
+                        </span>
+                    </div>
+
+                    <!-- Wallet Card Banner -->
+                    <div class="bg-gradient-to-r from-brand-900 via-brand-700 to-purple-600 rounded-2xl p-5 text-white mb-6 shadow-md flex flex-wrap justify-between items-center gap-4">
+                        <div>
+                            <span class="text-xs uppercase tracking-wider text-purple-200 font-bold block mb-1">Available SwiftPay Cash</span>
+                            <div class="text-3xl font-extrabold tracking-tight">₹340.00</div>
+                            <p class="text-xs text-purple-200 mt-1">Get 5% cashback auto-credited on every ₹499+ cart</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="addMoneyModal()" class="bg-white text-brand-900 font-bold px-4 py-2.5 rounded-xl text-xs hover:bg-purple-50 transition-colors shadow">
+                                + Add Money
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Saved Payment Methods -->
+                    <h4 class="font-bold text-gray-900 text-sm mb-3">Saved UPI & Cards</h4>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between p-3.5 border border-gray-100 rounded-xl bg-gray-50/50">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-white border border-gray-200 rounded-lg flex items-center justify-center text-brand-700 font-bold text-sm">
+                                    UPI
+                                </div>
+                                <div>
+                                    <p class="font-bold text-sm text-gray-900">Google Pay / PhonePe UPI</p>
+                                    <p class="text-xs text-gray-500">rohit.sharma@okhdfcbank</p>
+                                </div>
+                            </div>
+                            <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">Verified</span>
+                        </div>
+
+                        <div class="flex items-center justify-between p-3.5 border border-gray-100 rounded-xl bg-gray-50/50">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-white border border-gray-200 rounded-lg flex items-center justify-center text-blue-600 font-bold text-xs">
+                                    <i class="fab fa-cc-visa text-xl"></i>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-sm text-gray-900">HDFC Bank Debit Card</p>
+                                    <p class="text-xs text-gray-500">•••• •••• •••• 4092 (Expires 08/29)</p>
+                                </div>
+                            </div>
+                            <button onclick="showToast('Card removed')" class="text-gray-400 hover:text-red-500 text-xs">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 4: PROFILE SETTINGS -->
+                <div id="tab-settings" class="tab-content hidden bg-white rounded-2xl border border-gray-100 p-5 md:p-6 shadow-sm">
+                    <div class="pb-4 border-b border-gray-100 mb-5">
+                        <h3 class="text-xl font-bold text-gray-900">Personal Information</h3>
+                        <p class="text-xs text-gray-500">Update your delivery contact info and communication choices</p>
+                    </div>
+
+                    <form id="profile-form" onsubmit="saveProfile(event)" class="space-y-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-700 mb-1">Full Name</label>
+                                <input type="text" id="input-name" value="Rohit Sharma" required class="w-full bg-gray-50 border border-gray-200 focus:bg-white focus:border-brand-600 focus:ring-1 focus:ring-brand-600 rounded-xl p-2.5 text-sm outline-none transition-all">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-700 mb-1">Mobile Number (Non-editable)</label>
+                                <input type="text" id="input-phone" value="+91 98765 43210" disabled class="w-full bg-gray-100 border border-gray-200 text-gray-500 cursor-not-allowed rounded-xl p-2.5 text-sm outline-none">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Email Address</label>
+                            <input type="email" id="input-email" value="rohit.sharma@example.com" required class="w-full bg-gray-50 border border-gray-200 focus:bg-white focus:border-brand-600 focus:ring-1 focus:ring-brand-600 rounded-xl p-2.5 text-sm outline-none transition-all">
+                        </div>
+
+                        <!-- Notification toggles -->
+                        <div class="pt-2 border-t border-gray-100 space-y-3">
+                            <h4 class="font-bold text-gray-900 text-sm">Preferences & Alerts</h4>
+                            
+                            <label class="flex items-center justify-between cursor-pointer">
+                                <div>
+                                    <span class="text-sm font-semibold text-gray-800 block">WhatsApp Order Updates</span>
+                                    <span class="text-xs text-gray-500">Receive live 10-minute ETA and delivery rider phone link</span>
+                                </div>
+                                <input type="checkbox" checked class="w-4 h-4 text-brand-600 rounded focus:ring-brand-500 border-gray-300">
+                            </label>
+
+                            <label class="flex items-center justify-between cursor-pointer">
+                                <div>
+                                    <span class="text-sm font-semibold text-gray-800 block">Promotional Offers & Discounts</span>
+                                    <span class="text-xs text-gray-500">Alerts for 50% OFF flash sales & weekend kirana deals</span>
+                                </div>
+                                <input type="checkbox" class="w-4 h-4 text-brand-600 rounded focus:ring-brand-500 border-gray-300">
+                            </label>
+                        </div>
+
+                        <div class="pt-4 flex justify-end gap-3">
+                            <button type="button" onclick="showToast('Changes discarded')" class="px-4 py-2 border border-gray-200 text-gray-600 hover:bg-gray-50 rounded-xl text-sm font-semibold transition-colors">
+                                Cancel
+                            </button>
+                            <button type="submit" class="px-5 py-2 bg-brand-700 hover:bg-brand-800 text-white rounded-xl text-sm font-bold shadow-md transition-all">
+                                Save Profile
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+            </section>
+        </div>
+    </main>
+
+    <!-- Add Address Modal -->
+    <div id="address-modal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4 backdrop-blur-xs">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
+            <div class="flex justify-between items-center pb-3 border-b border-gray-100 mb-4">
+                <h3 class="font-bold text-lg text-gray-900">Add New Address</h3>
+                <button onclick="closeAddressModal()" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-800">
+                    <i class="fas fa-times text-xs"></i>
+                </button>
+            </div>
+            
+            <form onsubmit="handleNewAddress(event)" class="space-y-3">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Address Label</label>
+                    <div class="flex gap-2">
+                        <label class="flex-1 text-center py-1.5 border border-brand-500 bg-brand-50 text-brand-700 font-bold text-xs rounded-lg cursor-pointer">
+                            <input type="radio" name="addr-type" value="Home" checked class="hidden"> Home
+                        </label>
+                        <label class="flex-1 text-center py-1.5 border border-gray-200 text-gray-600 font-semibold text-xs rounded-lg cursor-pointer hover:bg-gray-50">
+                            <input type="radio" name="addr-type" value="Work" class="hidden"> Work
+                        </label>
+                        <label class="flex-1 text-center py-1.5 border border-gray-200 text-gray-600 font-semibold text-xs rounded-lg cursor-pointer hover:bg-gray-50">
+                            <input type="radio" name="addr-type" value="Other" class="hidden"> Other
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">House / Flat / Building</label>
+                    <input type="text" required placeholder="e.g. Flat 301, Silver Crest" class="w-full bg-gray-50 border border-gray-200 focus:bg-white focus:border-brand-600 rounded-xl p-2.5 text-xs outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Area / Street / Colony</label>
+                    <input type="text" required placeholder="e.g. Vijay Nagar, Scheme 54" class="w-full bg-gray-50 border border-gray-200 focus:bg-white focus:border-brand-600 rounded-xl p-2.5 text-xs outline-none">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">City</label>
+                        <input type="text" value="Indore" class="w-full bg-gray-100 border border-gray-200 rounded-xl p-2.5 text-xs outline-none text-gray-600">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Pin Code</label>
+                        <input type="text" required placeholder="452010" maxlength="6" class="w-full bg-gray-50 border border-gray-200 focus:bg-white focus:border-brand-600 rounded-xl p-2.5 text-xs outline-none">
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full mt-2 bg-brand-700 hover:bg-brand-800 text-white font-bold py-2.5 rounded-xl text-sm transition-colors">
+                    Save Address
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification for clean feedback without using alert() -->
+    <div id="toast-msg" class="fixed bottom-6 right-6 bg-gray-900 text-white text-xs font-semibold px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-300 z-50 border border-gray-700 pointer-events-none">
+        <i class="fas fa-check-circle text-green-400 text-sm"></i>
+        <span id="toast-text">Message</span>
+    </div>
+
+    <script>
+        // --- 1. Tab Switching Controller ---
+        function switchTab(tabId) {
+            // Hide all tab content panes
+            document.querySelectorAll('.tab-content').forEach(pane => {
+                pane.classList.add('hidden');
+            });
+
+            // Reset all tab button styles
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.className = "tab-button w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all";
+                const icon = btn.querySelector('i');
+                if (icon) icon.classList.replace('text-white', 'text-gray-400');
+            });
+
+            // Activate chosen tab pane
+            const targetPane = document.getElementById(`tab-${tabId}`);
+            if (targetPane) targetPane.classList.remove('hidden');
+
+            // Highlight chosen button
+            const activeBtn = document.getElementById(`btn-${tabId}`);
+            if (activeBtn) {
+                activeBtn.className = "tab-button w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold transition-all bg-brand-700 text-white shadow-sm";
+                const icon = activeBtn.querySelector('i');
+                if (icon) icon.classList.replace('text-gray-400', 'text-white');
+            }
+        }
+
+        // --- 2. Notification Toast (No alert() used) ---
+        function showToast(message) {
+            const toast = document.getElementById('toast-msg');
+            const toastText = document.getElementById('toast-text');
+            toastText.innerText = message;
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+                toast.classList.remove('translate-y-0', 'opacity-100');
+            }, 2600);
+        }
+
+        // --- 3. Profile Save Logic ---
+        function saveProfile(e) {
+            e.preventDefault();
+            const newName = document.getElementById('input-name').value;
+            document.getElementById('sidebar-name').innerText = newName;
+            showToast('Profile information saved successfully!');
+        }
+
+        // --- 4. Address Modal Toggles ---
+        function openAddressModal() {
+            document.getElementById('address-modal').classList.remove('hidden');
+        }
+
+        function closeAddressModal() {
+            document.getElementById('address-modal').classList.add('hidden');
+        }
+
+        function handleNewAddress(e) {
+            e.preventDefault();
+            closeAddressModal();
+            showToast('New delivery address added successfully!');
+        }
+
+        function addMoneyModal() {
+            showToast('₹200 added to SwiftPay via default UPI');
+        }
+
+        // --- 5. Bridge to Main Store: Reorder and Open Store ---
+        function triggerReorder(itemNames) {
+            showToast(`Reordering ${itemNames.join(' & ')}! Redirecting to SwiftCart...`);
+            setTimeout(() => {
+                window.location.href = 'swiftcart_app.html';
+            }, 1200);
+        }
+    </script>
+</body>
+</html>

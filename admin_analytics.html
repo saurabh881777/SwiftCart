@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dark Store Command Center & Fleet Telemetry - SwiftCart Admin</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f5f3ff',
+                            100: '#ede9fe',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            700: '#6d28d9',
+                            800: '#5b21b6',
+                            900: '#4c1d95',
+                        },
+                        ops: {
+                            dark: '#0b0f19',
+                            card: '#111827',
+                            border: '#1f2937',
+                            accent: '#10b981'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .radar-grid {
+            background-image: radial-gradient(rgba(139, 92, 246, 0.15) 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #111827; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #374151; border-radius: 9999px; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-brand-600 selection:text-white">
+
+    <!-- Top Telemetry Header -->
+    <header class="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16 gap-3">
+                
+                <!-- Brand & Mission Control Identifier -->
+                <div class="flex items-center gap-3">
+                    <a href="swiftcart_app.html" class="flex items-center gap-2 group">
+                        <div class="bg-brand-600 text-white w-9 h-9 rounded-xl flex items-center justify-center font-black text-xl italic group-hover:bg-brand-700 transition-colors shadow-lg shadow-brand-600/30">
+                            S
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-lg font-black tracking-tight text-white">SwiftCart</span>
+                                <span class="bg-brand-500/20 text-brand-300 text-[10px] font-mono px-2 py-0.5 rounded-full border border-brand-500/30 uppercase font-bold tracking-wider">OPS CORE v3.2</span>
+                            </div>
+                            <span class="text-[10px] font-semibold text-slate-400 block -mt-1">City Hub: Indore Urban Zone</span>
+                        </div>
+                    </a>
+
+                    <!-- Live Gateway Status Pulse -->
+                    <div class="hidden md:flex items-center gap-2 pl-4 border-l border-slate-800">
+                        <span class="relative flex h-2.5 w-2.5">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                        </span>
+                        <span class="text-xs font-mono text-emerald-400 font-semibold">4/4 Dark Stores Online</span>
+                    </div>
+                </div>
+
+                <!-- Navigation between all apps in the ecosystem -->
+                <div class="flex items-center gap-2">
+                    <a href="swiftcart_app.html" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition-all flex items-center gap-1.5" title="Customer Storefront">
+                        <i class="fas fa-bag-shopping text-purple-400"></i>
+                        <span class="hidden sm:inline">Storefront</span>
+                    </a>
+                    <a href="rider_tracking.html" class="px-3 py-1.5 rounded-xl bg-amber-950/60 hover:bg-amber-900/60 text-amber-300 text-xs font-semibold border border-amber-800/50 transition-all flex items-center gap-1.5" title="Live Rider GPS">
+                        <i class="fas fa-motorcycle text-amber-400 animate-pulse"></i>
+                        <span class="hidden sm:inline">Rider GPS</span>
+                    </a>
+                    <a href="profile.html" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition-all flex items-center gap-1.5" title="User Profile">
+                        <i class="fas fa-user-circle text-slate-400"></i>
+                        <span class="hidden sm:inline">Profile</span>
+                    </a>
+                    <!-- Refresh Feed Button -->
+                    <button onclick="refreshMetrics()" class="p-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold transition-all shadow-md active:scale-95" title="Refresh Telemetry">
+                        <i class="fas fa-arrows-rotate" id="refresh-icon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sub-bar: Real-Time Quick Commerce KPI Cards -->
+    <section class="border-b border-slate-800/80 bg-slate-900/40 py-3.5 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
+            
+            <!-- KPI 1: Average SLA Fulfillment -->
+            <div class="bg-slate-900/90 border border-slate-800 p-3 rounded-2xl flex flex-col justify-between">
+                <div class="flex items-center justify-between text-slate-400 text-[11px] font-semibold">
+                    <span>AVG DELIVERY SLA</span>
+                    <i class="fas fa-stopwatch text-yellow-400"></i>
+                </div>
+                <div class="mt-2 flex items-baseline gap-1.5">
+                    <span class="font-mono font-black text-2xl text-white tracking-tight" id="kpi-sla">08:14</span>
+                    <span class="text-[10px] text-emerald-400 font-bold"><i class="fas fa-arrow-down"></i> -22s</span>
+                </div>
+                <span class="text-[10px] text-slate-500 font-medium">Goal: Sub-10 Mins</span>
+            </div>
+
+            <!-- KPI 2: Live Active Orders -->
+            <div class="bg-slate-900/90 border border-slate-800 p-3 rounded-2xl flex flex-col justify-between">
+                <div class="flex items-center justify-between text-slate-400 text-[11px] font-semibold">
+                    <span>ACTIVE IN-TRANSIT</span>
+                    <i class="fas fa-boxes-packing text-brand-400"></i>
+                </div>
+                <div class="mt-2 flex items-baseline gap-1.5">
+                    <span class="font-mono font-black text-2xl text-brand-400 tracking-tight" id="kpi-active">142</span>
+                    <span class="text-[10px] text-emerald-400 font-bold">+18%</span>
+                </div>
+                <span class="text-[10px] text-slate-500 font-medium">96% on-time pace</span>
+            </div>
+
+            <!-- KPI 3: Fleet Utilization -->
+            <div class="bg-slate-900/90 border border-slate-800 p-3 rounded-2xl flex flex-col justify-between">
+                <div class="flex items-center justify-between text-slate-400 text-[11px] font-semibold">
+                    <span>FLEET UTILIZATION</span>
+                    <i class="fas fa-person-biking text-emerald-400"></i>
+                </div>
+                <div class="mt-2 flex items-baseline gap-1.5">
+                    <span class="font-mono font-black text-2xl text-emerald-400 tracking-tight" id="kpi-fleet">86%</span>
+                    <span class="text-[10px] text-slate-400">68/79 active</span>
+                </div>
+                <span class="text-[10px] text-slate-500 font-medium">11 idle in hub standby</span>
+            </div>
+
+            <!-- KPI 4: Today's GMV -->
+            <div class="bg-slate-900/90 border border-slate-800 p-3 rounded-2xl flex flex-col justify-between">
+                <div class="flex items-center justify-between text-slate-400 text-[11px] font-semibold">
+                    <span>TODAY'S GMV</span>
+                    <i class="fas fa-indian-rupee-sign text-emerald-400"></i>
+                </div>
+                <div class="mt-2 flex items-baseline gap-1.5">
+                    <span class="font-mono font-black text-2xl text-white tracking-tight" id="kpi-gmv">₹3,48,290</span>
+                </div>
+                <span class="text-[10px] text-emerald-400 font-medium">1,412 orders bagged</span>
+            </div>
+
+            <!-- KPI 5: Average Basket Value (AOV) -->
+            <div class="bg-slate-900/90 border border-slate-800 p-3 rounded-2xl flex flex-col justify-between">
+                <div class="flex items-center justify-between text-slate-400 text-[11px] font-semibold">
+                    <span>BASKET AOV</span>
+                    <i class="fas fa-receipt text-cyan-400"></i>
+                </div>
+                <div class="mt-2 flex items-baseline gap-1.5">
+                    <span class="font-mono font-black text-2xl text-white tracking-tight">₹246</span>
+                    <span class="text-[10px] text-cyan-400 font-bold">4.2 items</span>
+                </div>
+                <span class="text-[10px] text-slate-500 font-medium">Gross Margin: 24.8%</span>
+            </div>
+
+            <!-- KPI 6: Stock-out Alert Counter -->
+            <div class="bg-red-950/40 border border-red-900/50 p-3 rounded-2xl flex flex-col justify-between">
+                <div class="flex items-center justify-between text-red-300 text-[11px] font-semibold">
+                    <span>CRITICAL SKUs</span>
+                    <i class="fas fa-triangle-exclamation text-red-400 animate-pulse"></i>
+                </div>
+                <div class="mt-2 flex items-baseline gap-1.5">
+                    <span class="font-mono font-black text-2xl text-red-400 tracking-tight" id="kpi-skus">5</span>
+                    <span class="text-[10px] text-red-300 font-medium">&lt; 15 mins supply</span>
+                </div>
+                <span class="text-[10px] text-red-400/80 font-medium">Auto PO triggered</span>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Main Command Console -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full flex-grow flex flex-col gap-6">
+        
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            
+            <!-- Left 8 Columns: Interactive Dark Store Heatmap & Order Velocity Engine -->
+            <div class="lg:col-span-8 space-y-6">
+                
+                <!-- City Dark Store Network Radar & Map Canvas -->
+                <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl relative overflow-hidden radar-grid">
+                    <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h3 class="text-base font-extrabold text-white flex items-center gap-2">
+                                    <i class="fas fa-microchip text-brand-500"></i> Hyperlocal Micro-Warehouse Heatmap
+                                </h3>
+                                <span class="bg-emerald-500/10 text-emerald-400 text-[10px] font-mono font-bold px-2 py-0.5 rounded border border-emerald-500/20">LIVE PING</span>
+                            </div>
+                            <p class="text-xs text-slate-400 mt-0.5">Real-time picking queue load and delivery radius coverage across Indore</p>
+                        </div>
+
+                        <!-- Store Selector Filter -->
+                        <div class="flex items-center gap-2">
+                            <select id="hub-filter" onchange="filterHubTelemetry(this.value)" class="bg-slate-800 border border-slate-700 text-xs font-semibold text-slate-200 rounded-xl px-3 py-1.5 focus:outline-none focus:border-brand-500">
+                                <option value="all">All Micro-Hubs (4)</option>
+                                <option value="ind-04">Vijay Nagar #IND-04 (High Load)</option>
+                                <option value="ind-02">Palasia #IND-02 (Normal)</option>
+                                <option value="ind-07">Bhawarkua #IND-07 (Surge)</option>
+                                <option value="ind-09">Super Corridor #IND-09 (Moderate)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Canvas Map Representation of Indore Hubs -->
+                    <div class="relative w-full h-[320px] bg-slate-950/80 rounded-2xl overflow-hidden border border-slate-800/80">
+                        <canvas id="hubMapCanvas" class="w-full h-full block cursor-crosshair"></canvas>
+                        
+                        <!-- Floating Map Legend Overlay -->
+                        <div class="absolute bottom-3 left-3 bg-slate-900/90 border border-slate-800 rounded-xl p-2.5 text-[10px] font-mono text-slate-300 flex items-center gap-4 backdrop-blur-md">
+                            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Normal (&lt;70% Capacity)</span>
+                            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Heavy Load (70-90%)</span>
+                            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span> Surge Alert (&gt;90%)</span>
+                        </div>
+
+                        <!-- Interactive Store Info Tooltip -->
+                        <div id="canvas-tooltip" class="absolute hidden bg-slate-900/95 border border-brand-500/50 p-2.5 rounded-xl shadow-2xl pointer-events-none text-xs z-20">
+                            <div class="font-bold text-white text-xs" id="tooltip-title">Vijay Nagar Hub #04</div>
+                            <div class="text-[11px] text-brand-300 font-mono mt-0.5" id="tooltip-meta">Orders: 42 • SLA: 7.8m</div>
+                        </div>
+                    </div>
+
+                    <!-- Hub Quick Stat Cards Grid -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
+                        <div class="bg-slate-950/60 border border-slate-800/70 p-3 rounded-2xl hover:border-brand-500/50 transition-colors">
+                            <div class="flex items-center justify-between text-xs font-bold text-slate-200">
+                                <span>Vijay Nagar</span>
+                                <span class="text-rose-400 font-mono text-[10px]">91% Load</span>
+                            </div>
+                            <div class="mt-2 text-slate-400 text-[11px] space-y-0.5 font-mono">
+                                <p>Queue: <strong class="text-white">46 orders</strong></p>
+                                <p>Riders: <strong class="text-emerald-400">22 active</strong></p>
+                                <p>Avg SLA: <strong class="text-amber-400">8m 10s</strong></p>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-950/60 border border-slate-800/70 p-3 rounded-2xl hover:border-brand-500/50 transition-colors">
+                            <div class="flex items-center justify-between text-xs font-bold text-slate-200">
+                                <span>Palasia</span>
+                                <span class="text-emerald-400 font-mono text-[10px]">62% Load</span>
+                            </div>
+                            <div class="mt-2 text-slate-400 text-[11px] space-y-0.5 font-mono">
+                                <p>Queue: <strong class="text-white">28 orders</strong></p>
+                                <p>Riders: <strong class="text-emerald-400">18 active</strong></p>
+                                <p>Avg SLA: <strong class="text-emerald-400">7m 35s</strong></p>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-950/60 border border-slate-800/70 p-3 rounded-2xl hover:border-brand-500/50 transition-colors">
+                            <div class="flex items-center justify-between text-xs font-bold text-slate-200">
+                                <span>Bhawarkua</span>
+                                <span class="text-amber-400 font-mono text-[10px]">84% Load</span>
+                            </div>
+                            <div class="mt-2 text-slate-400 text-[11px] space-y-0.5 font-mono">
+                                <p>Queue: <strong class="text-white">52 orders</strong></p>
+                                <p>Riders: <strong class="text-emerald-400">19 active</strong></p>
+                                <p>Avg SLA: <strong class="text-amber-400">8m 42s</strong></p>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-950/60 border border-slate-800/70 p-3 rounded-2xl hover:border-brand-500/50 transition-colors">
+                            <div class="flex items-center justify-between text-xs font-bold text-slate-200">
+                                <span>Super Corridor</span>
+                                <span class="text-emerald-400 font-mono text-[10px]">48% Load</span>
+                            </div>
+                            <div class="mt-2 text-slate-400 text-[11px] space-y-0.5 font-mono">
+                                <p>Queue: <strong class="text-white">16 orders</strong></p>
+                                <p>Riders: <strong class="text-emerald-400">9 active</strong></p>
+                                <p>Avg SLA: <strong class="text-emerald-400">6m 58s</strong></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Order Inflow & SLA Velocity (SVG Visualizer) -->
+                <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl">
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
+                        <div>
+                            <h4 class="text-sm font-extrabold text-white flex items-center gap-2">
+                                <i class="fas fa-chart-line text-cyan-400"></i> Order Velocity & 10-Min SLA Distribution
+                            </h4>
+                            <p class="text-xs text-slate-400">Orders placed per 15-minute slot vs SLA adherence percentage</p>
+                        </div>
+                        <div class="flex items-center gap-3 text-xs font-mono">
+                            <span class="flex items-center gap-1.5 text-slate-300">
+                                <span class="w-3 h-3 bg-brand-500 rounded"></span> Orders / Slot
+                            </span>
+                            <span class="flex items-center gap-1.5 text-slate-300">
+                                <span class="w-3 h-1 bg-emerald-400 rounded"></span> 10m SLA Rate (97.4%)
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Custom SVG Dynamic Bar/Line Graph -->
+                    <div class="w-full h-44 relative">
+                        <svg class="w-full h-full overflow-visible" viewBox="0 0 700 160">
+                            <!-- Horizontal reference grid lines -->
+                            <line x1="0" y1="40" x2="700" y2="40" stroke="#1f2937" stroke-dasharray="4 4"/>
+                            <line x1="0" y1="80" x2="700" y2="80" stroke="#1f2937" stroke-dasharray="4 4"/>
+                            <line x1="0" y1="120" x2="700" y2="120" stroke="#1f2937" stroke-dasharray="4 4"/>
+
+                            <!-- Hourly throughput bars -->
+                            <g fill="#8b5cf6" opacity="0.85">
+                                <rect x="30" y="90" width="32" height="70" rx="4" class="hover:opacity-100 transition-opacity"/>
+                                <rect x="95" y="70" width="32" height="90" rx="4" class="hover:opacity-100 transition-opacity"/>
+                                <rect x="160" y="50" width="32" height="110" rx="4" class="hover:opacity-100 transition-opacity"/>
+                                <rect x="225" y="42" width="32" height="118" rx="4" class="hover:opacity-100 transition-opacity"/>
+                                <rect x="290" y="30" width="32" height="130" rx="4" fill="#a78bfa" class="hover:opacity-100 transition-opacity"/>
+                                <rect x="355" y="48" width="32" height="112" rx="4" class="hover:opacity-100 transition-opacity"/>
+                                <rect x="420" y="65" width="32" height="95" rx="4" class="hover:opacity-100 transition-opacity"/>
+                                <rect x="485" y="80" width="32" height="80" rx="4" class="hover:opacity-100 transition-opacity"/>
+                                <rect x="550" y="35" width="32" height="125" rx="4" fill="#a78bfa" class="hover:opacity-100 transition-opacity"/>
+                                <rect x="615" y="25" width="32" height="135" rx="4" fill="#c084fc" class="hover:opacity-100 transition-opacity"/>
+                            </g>
+
+                            <!-- Trend Line: SLA Adherence -->
+                            <polyline fill="none" stroke="#10b981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"
+                                points="46,35 111,28 176,32 241,40 306,45 371,32 436,25 501,30 566,38 631,34"/>
+                            
+                            <!-- Dots on the line -->
+                            <circle cx="306" cy="45" r="4" fill="#10b981" stroke="#064e3b" stroke-width="2"/>
+                            <circle cx="631" cy="34" r="4" fill="#10b981" stroke="#064e3b" stroke-width="2"/>
+                        </svg>
+
+                        <!-- Timeline labels -->
+                        <div class="flex justify-between text-[10px] font-mono text-slate-500 mt-2 px-4">
+                            <span>17:00</span>
+                            <span>17:30</span>
+                            <span>18:00</span>
+                            <span>18:30</span>
+                            <span>19:00</span>
+                            <span>19:30</span>
+                            <span>20:00</span>
+                            <span>20:30</span>
+                            <span>21:00</span>
+                            <span>21:30 (Peak)</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right 4 Columns: Predictive Stock-Outs & Dark Store Picker Queues -->
+            <div class="lg:col-span-4 space-y-6">
+                
+                <!-- AI Predictive Stock-Out Prevention Card -->
+                <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl">
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse"></span>
+                            <h4 class="text-sm font-extrabold text-white">AI Stock-Out Predictor</h4>
+                        </div>
+                        <span class="text-[10px] font-mono font-bold text-rose-400 bg-rose-950/60 border border-rose-800/40 px-2 py-0.5 rounded-full">
+                            &lt; 30 Mins Left
+                        </span>
+                    </div>
+                    <p class="text-xs text-slate-400 mb-4">ML engine monitors velocity and shelf weight sensors to auto-trigger warehouse reorders.</p>
+
+                    <!-- Critical SKU Items -->
+                    <div class="space-y-3" id="stockout-list">
+                        <!-- SKU 1: Milk -->
+                        <div class="bg-slate-950/70 border border-slate-800 p-3 rounded-2xl flex items-center justify-between gap-3">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center text-lg">
+                                    🥛
+                                </div>
+                                <div>
+                                    <h5 class="text-xs font-bold text-white">Amul Taaza Milk 500ml</h5>
+                                    <div class="text-[10px] text-slate-400 font-mono">Bin PU-04 • 14 units left</div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-xs font-bold text-rose-400 font-mono">Runs out in 12m</span>
+                                <button onclick="triggerAutoPO('Amul Milk 500ml')" class="block mt-1 text-[10px] bg-brand-600 hover:bg-brand-500 text-white font-bold px-2 py-0.5 rounded transition-colors">
+                                    Reorder +100
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- SKU 2: Bread -->
+                        <div class="bg-slate-950/70 border border-slate-800 p-3 rounded-2xl flex items-center justify-between gap-3">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center text-lg">
+                                    🍞
+                                </div>
+                                <div>
+                                    <h5 class="text-xs font-bold text-white">Whole Wheat Bread 400g</h5>
+                                    <div class="text-[10px] text-slate-400 font-mono">Bin BK-02 • 9 units left</div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-xs font-bold text-rose-400 font-mono">Runs out in 18m</span>
+                                <button onclick="triggerAutoPO('Wheat Bread 400g')" class="block mt-1 text-[10px] bg-brand-600 hover:bg-brand-500 text-white font-bold px-2 py-0.5 rounded transition-colors">
+                                    Reorder +60
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- SKU 3: Farm Eggs -->
+                        <div class="bg-slate-950/70 border border-slate-800 p-3 rounded-2xl flex items-center justify-between gap-3">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center text-lg">
+                                    🥚
+                                </div>
+                                <div>
+                                    <h5 class="text-xs font-bold text-white">Brown Farm Eggs (6-Pack)</h5>
+                                    <div class="text-[10px] text-slate-400 font-mono">Bin EG-01 • 11 packs left</div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-xs font-bold text-amber-400 font-mono">Runs out in 24m</span>
+                                <button onclick="triggerAutoPO('Farm Eggs 6pk')" class="block mt-1 text-[10px] bg-brand-600 hover:bg-brand-500 text-white font-bold px-2 py-0.5 rounded transition-colors">
+                                    Reorder +50
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Store Picking SLA & Packer Feed -->
+                <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl">
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-3">
+                        <div>
+                            <h4 class="text-sm font-extrabold text-white flex items-center gap-2">
+                                <i class="fas fa-barcode text-brand-400"></i> Store Picking Queue (Live)
+                            </h4>
+                            <p class="text-xs text-slate-400">90-second packing target per batch</p>
+                        </div>
+                        <span class="text-xs font-mono font-bold text-emerald-400">Avg: 1m 18s</span>
+                    </div>
+
+                    <!-- Live Packer Feed Rows -->
+                    <div class="space-y-2.5 text-xs font-sans max-h-60 overflow-y-auto custom-scrollbar pr-1" id="picker-feed">
+                        
+                        <div class="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800 flex items-center justify-between">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <span class="font-bold text-white">#SC-9042</span>
+                                    <span class="bg-purple-900/40 text-purple-300 font-mono text-[10px] px-1.5 py-0.2 rounded border border-purple-700/50">4 items</span>
+                                </div>
+                                <div class="text-[11px] text-slate-400 mt-0.5">Picker: Sanjay (Bin PU-4)</div>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-emerald-400 font-mono font-bold">Bagged in 58s</span>
+                                <span class="block text-[10px] text-slate-500">Handed to Ramesh (Rider)</span>
+                            </div>
+                        </div>
+
+                        <div class="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800 flex items-center justify-between">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <span class="font-bold text-white">#SC-9043</span>
+                                    <span class="bg-purple-900/40 text-purple-300 font-mono text-[10px] px-1.5 py-0.2 rounded border border-purple-700/50">2 items</span>
+                                </div>
+                                <div class="text-[11px] text-slate-400 mt-0.5">Picker: Priya (Bin BK-1)</div>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-yellow-400 font-mono font-bold animate-pulse">Packing... 42s</span>
+                                <span class="block text-[10px] text-slate-500">Aisle 2 walkpath</span>
+                            </div>
+                        </div>
+
+                        <div class="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800 flex items-center justify-between">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <span class="font-bold text-white">#SC-9044</span>
+                                    <span class="bg-purple-900/40 text-purple-300 font-mono text-[10px] px-1.5 py-0.2 rounded border border-purple-700/50">6 items</span>
+                                </div>
+                                <div class="text-[11px] text-slate-400 mt-0.5">Picker: Deepa (Bin EG-3)</div>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-cyan-400 font-mono font-bold">Barcode scanned</span>
+                                <span class="block text-[10px] text-slate-500">Cold chain verified</span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Dispatch SLA Benchmark Pill -->
+                    <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
+                        <span>Ground Pack SLA Pass Rate:</span>
+                        <span class="text-emerald-400 font-bold font-mono">99.2% on-time</span>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- In-App Notification Toast (Clean UX, no alert()) -->
+    <div id="toast-admin" class="fixed bottom-6 right-6 bg-slate-900 text-white text-xs font-semibold px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-2.5 transform translate-y-20 opacity-0 transition-all duration-300 z-50 border border-slate-700 pointer-events-none">
+        <i class="fas fa-circle-check text-emerald-400 text-sm"></i>
+        <span id="toast-admin-text">Telemetry updated</span>
+    </div>
+
+    <script>
+        // --- 1. Global State & Dark Store Coordinates for Indore ---
+        let mapCanvas, ctx;
+        let hubData = [
+            { id: "ind-04", name: "Vijay Nagar #IND-04", x: 0.35, y: 0.32, radiusKm: 2.2, orders: 46, riders: 22, load: 91, status: "surge" },
+            { id: "ind-02", name: "Palasia Hub #IND-02", x: 0.65, y: 0.52, radiusKm: 2.0, orders: 28, riders: 18, load: 62, status: "normal" },
+            { id: "ind-07", name: "Bhawarkua #IND-07", x: 0.42, y: 0.76, radiusKm: 2.4, orders: 52, riders: 19, load: 84, status: "heavy" },
+            { id: "ind-09", name: "Super Corridor #IND-09", x: 0.22, y: 0.18, radiusKm: 2.8, orders: 16, riders: 9, load: 48, status: "normal" }
+        ];
+
+        let selectedHub = "all";
+        let animationFrame;
+
+        // --- 2. Canvas Map Initialization ---
+        window.onload = function() {
+            mapCanvas = document.getElementById('hubMapCanvas');
+            ctx = mapCanvas.getContext('2d');
+            resizeMap();
+            window.addEventListener('resize', resizeMap);
+
+            // Start Canvas Render Loop
+            drawHubMap();
+
+            // Setup Mouse Hover Tooltip on Canvas
+            mapCanvas.addEventListener('mousemove', handleCanvasHover);
+            mapCanvas.addEventListener('mouseleave', () => {
+                document.getElementById('canvas-tooltip').classList.add('hidden');
+            });
+
+            // Start Simulated Real-Time Metric Ticker
+            startLiveTicker();
+        };
+
+        function resizeMap() {
+            const rect = mapCanvas.parentElement.getBoundingClientRect();
+            mapCanvas.width = rect.width;
+            mapCanvas.height = rect.height;
+        }
+
+        // --- 3. Canvas Drawing Engine (City Map, Coverage Radii, Riders) ---
+        function drawHubMap() {
+            ctx.clearRect(0, 0, mapCanvas.width, mapCanvas.height);
+            const w = mapCanvas.width;
+            const h = mapCanvas.height;
+
+            // Background city grid
+            ctx.fillStyle = "#060911";
+            ctx.fillRect(0, 0, w, h);
+
+            // Faint city road lines
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.04)";
+            ctx.lineWidth = 1;
+            for (let i = 0; i < w; i += 30) {
+                ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, h); ctx.stroke();
+            }
+            for (let j = 0; j < h; j += 30) {
+                ctx.beginPath(); ctx.moveTo(0, j); ctx.lineTo(w, j); ctx.stroke();
+            }
+
+            // Draw Highway arteries
+            ctx.strokeStyle = "rgba(124, 58, 237, 0.18)";
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(w * 0.1, h * 0.2);
+            ctx.lineTo(w * 0.85, h * 0.85);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(w * 0.2, h * 0.8);
+            ctx.lineTo(w * 0.75, h * 0.2);
+            ctx.stroke();
+
+            // Render each Dark Store Hub and its geofenced delivery radius
+            hubData.forEach((hub) => {
+                const cx = hub.x * w;
+                const cy = hub.y * h;
+                const isFiltered = (selectedHub === "all" || selectedHub === hub.id);
+
+                if (!isFiltered) return;
+
+                // Color mapping based on load
+                let color = "#10b981"; // emerald
+                if (hub.load > 85) color = "#f43f5e"; // rose
+                else if (hub.load > 70) color = "#f59e0b"; // amber
+
+                // Radius circle of 2km service zone
+                const radiusPx = hub.radiusKm * 38;
+                ctx.beginPath();
+                ctx.arc(cx, cy, radiusPx, 0, Math.PI * 2);
+                ctx.fillStyle = color.replace(')', ', 0.08)').replace('rgb', 'rgba').replace('#10b981', 'rgba(16, 185, 129, 0.08)').replace('#f43f5e', 'rgba(244, 63, 94, 0.08)').replace('#f59e0b', 'rgba(245, 158, 11, 0.08)');
+                ctx.fill();
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 1.5;
+                ctx.setLineDash([4, 4]);
+                ctx.stroke();
+                ctx.setLineDash([]); // reset dash
+
+                // Animated Pulse circle
+                const pulse = (Math.sin(Date.now() / 300) + 1) * 4;
+                ctx.beginPath();
+                ctx.arc(cx, cy, 14 + pulse, 0, Math.PI * 2);
+                ctx.fillStyle = color.replace('#10b981', 'rgba(16, 185, 129, 0.2)').replace('#f43f5e', 'rgba(244, 63, 94, 0.2)').replace('#f59e0b', 'rgba(245, 158, 11, 0.2)');
+                ctx.fill();
+
+                // Core Hub Pin
+                ctx.beginPath();
+                ctx.arc(cx, cy, 12, 0, Math.PI * 2);
+                ctx.fillStyle = "#0f172a";
+                ctx.fill();
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = color;
+                ctx.stroke();
+
+                // Store icon / letter
+                ctx.font = "bold 9px 'JetBrains Mono', monospace";
+                ctx.fillStyle = "#ffffff";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText("DS", cx, cy);
+
+                // Hub Label Tag
+                ctx.font = "bold 11px Inter, sans-serif";
+                const label = `${hub.name} (${hub.load}%)`;
+                const textWidth = ctx.measureText(label).width;
+                ctx.fillStyle = "rgba(15, 23, 42, 0.85)";
+                ctx.fillRect(cx - (textWidth / 2) - 6, cy + 18, textWidth + 12, 18);
+                ctx.fillStyle = "#f1f5f9";
+                ctx.fillText(label, cx, cy + 28);
+            });
+
+            // Draw scattered moving rider dots around active hubs
+            const time = Date.now() / 1000;
+            for (let i = 0; i < 18; i++) {
+                const hub = hubData[i % hubData.length];
+                const angle = time * 0.4 + (i * 1.3);
+                const dist = 30 + (i * 3.5) % (hub.radiusKm * 32);
+                const rx = (hub.x * w) + Math.cos(angle) * dist;
+                const ry = (hub.y * h) + Math.sin(angle) * dist;
+
+                ctx.beginPath();
+                ctx.arc(rx, ry, 3.5, 0, Math.PI * 2);
+                ctx.fillStyle = "#c084fc"; // purple rider beacon
+                ctx.fill();
+            }
+
+            animationFrame = requestAnimationFrame(drawHubMap);
+        }
+
+        // --- 4. Interactive Canvas Tooltip on Hover ---
+        function handleCanvasHover(e) {
+            const rect = mapCanvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+            const tooltip = document.getElementById('canvas-tooltip');
+
+            let found = null;
+            hubData.forEach((hub) => {
+                const cx = hub.x * mapCanvas.width;
+                const cy = hub.y * mapCanvas.height;
+                const dist = Math.hypot(mouseX - cx, mouseY - cy);
+                if (dist < 22) {
+                    found = hub;
+                }
+            });
+
+            if (found) {
+                tooltip.style.left = `${mouseX + 15}px`;
+                tooltip.style.top = `${mouseY - 20}px`;
+                document.getElementById('tooltip-title').innerText = found.name;
+                document.getElementById('tooltip-meta').innerText = `Queue: ${found.orders} orders • Riders: ${found.riders} active • Load: ${found.load}%`;
+                tooltip.classList.remove('hidden');
+            } else {
+                tooltip.classList.add('hidden');
+            }
+        }
+
+        // --- 5. Interactive Operations Logic ---
+        function filterHubTelemetry(hubId) {
+            selectedHub = hubId;
+            showAdminToast(`Telemetry filtered: ${hubId === 'all' ? 'All Indore Hubs' : hubId.toUpperCase()}`);
+        }
+
+        function triggerAutoPO(itemName) {
+            showAdminToast(`Purchase Order PO-7819 issued: +100 units of ${itemName} dispatched to dark store!`);
+        }
+
+        function refreshMetrics() {
+            const icon = document.getElementById('refresh-icon');
+            icon.classList.add('fa-spin');
+
+            // Fluctuate stats slightly for realism
+            setTimeout(() => {
+                const newActive = Math.floor(138 + Math.random() * 12);
+                document.getElementById('kpi-active').innerText = newActive;
+                icon.classList.remove('fa-spin');
+                showAdminToast("Dark Store telemetry synchronized with edge nodes.");
+            }, 600);
+        }
+
+        function startLiveTicker() {
+            setInterval(() => {
+                // Subtle autonomous SLA drift
+                const seconds = 10 + Math.floor(Math.random() * 8);
+                document.getElementById('kpi-sla').innerText = `08:${seconds.toString().padStart(2, '0')}`;
+            }, 4000);
+        }
+
+        function showAdminToast(msg) {
+            const toast = document.getElementById('toast-admin');
+            const text = document.getElementById('toast-admin-text');
+            text.innerText = msg;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+                toast.classList.remove('translate-y-0', 'opacity-100');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

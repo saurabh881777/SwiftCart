@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SwiftCart - 10 Min Hyperlocal Grocery Delivery</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons CDN -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f5f3ff',
+                            100: '#ede9fe',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            700: '#6d28d9',
+                            800: '#5b21b6',
+                            900: '#4c1d95',
+                        }
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .hide-scroll::-webkit-scrollbar { display: none; }
+        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .card-hover { 
+            transition: transform 0.2s ease, box-shadow 0.2s ease; 
+        }
+        .card-hover:hover { 
+            transform: translateY(-4px); 
+            box-shadow: 0 12px 20px -4px rgba(109, 40, 217, 0.12); 
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 antialiased min-h-screen flex flex-col font-sans select-none">
+
+    <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16 md:h-20 gap-3 md:gap-4">
+                
+                <!-- Logo & Brand Identifier -->
+                <div class="flex items-center gap-2 cursor-pointer shrink-0" onclick="resetView()">
+                    <div class="bg-brand-700 text-white w-9 h-9 md:w-10 md:h-10 rounded-xl flex items-center justify-center font-black text-xl italic shadow-md shadow-brand-700/20">
+                        S
+                    </div>
+                    <div class="hidden sm:block">
+                        <span class="text-xl md:text-2xl font-black text-brand-900 tracking-tight block leading-tight">SwiftCart</span>
+                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block -mt-1">10-Min Kirana</span>
+                    </div>
+                </div>
+
+                <!-- Live Location Badge -->
+                <div class="hidden lg:flex flex-col border-l-2 border-gray-100 pl-4 cursor-pointer hover:bg-gray-50 p-2 rounded-xl transition-colors">
+                    <div class="flex items-center gap-1.5 text-xs font-black text-gray-900 uppercase tracking-wider">
+                        <span>Delivery in 10 mins</span>
+                        <i class="fas fa-bolt text-yellow-500 text-xs animate-bounce"></i>
+                    </div>
+                    <div class="text-xs text-gray-500 flex items-center gap-1 font-medium">
+                        <span class="truncate max-w-[180px]">Scheme 54, Vijay Nagar, Indore</span>
+                        <i class="fas fa-chevron-down text-[10px] text-gray-400"></i>
+                    </div>
+                </div>
+
+                <!-- Instant Dynamic Search Input -->
+                <div class="flex-grow max-w-xl relative">
+                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                        <i class="fas fa-search text-gray-400 text-sm"></i>
+                    </div>
+                    <input type="text" id="search-input" oninput="handleSearch(event)" placeholder="Search for 'milk', 'bread', 'chips'..." class="w-full bg-gray-100 border border-transparent focus:border-brand-500 focus:bg-white rounded-xl pl-10 pr-4 py-2 text-xs md:text-sm font-medium outline-none transition-all shadow-inner">
+                </div>
+
+                <!-- Navigation Action Links: Admin Ops, Rider GPS, Profile & Cart -->
+                <div class="flex items-center gap-2 shrink-0">
+                    <a href="admin_analytics.html" class="hidden md:flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-slate-900 text-purple-300 hover:bg-slate-800 border border-slate-700 transition-all shadow-sm" title="Dark Store Ops Hub">
+                        <i class="fas fa-chart-line text-purple-400"></i>
+                        <span>Ops Admin</span>
+                    </a>
+
+                    <a href="rider_tracking.html" class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200 transition-all shadow-sm" title="Live Bike GPS Tracking">
+                        <i class="fas fa-motorcycle text-amber-600 animate-pulse"></i>
+                        <span class="hidden sm:inline">Track Rider</span>
+                    </a>
+
+                    <a href="profile.html" class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-purple-50 text-brand-700 hover:bg-brand-100 border border-brand-200 transition-all shadow-sm" title="Account & Past Orders">
+                        <i class="fas fa-user-circle text-brand-600 text-sm"></i>
+                        <span class="hidden sm:inline">Profile</span>
+                    </a>
+
+                    <!-- Cart Trigger Button -->
+                    <button onclick="toggleCart()" class="flex items-center gap-2 bg-brand-700 hover:bg-brand-800 text-white px-3.5 md:px-4 py-2 md:py-2.5 rounded-xl font-bold text-xs md:text-sm transition-all shadow-md shadow-brand-700/20 active:scale-95 relative">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span id="nav-cart-total" class="hidden sm:inline font-mono">₹0</span>
+                        <span id="nav-cart-badge" class="absolute -top-1.5 -right-1.5 bg-rose-500 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-black shadow-md hidden">0</span>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full">
+        
+        <!-- Promo Hero Banner -->
+        <div class="bg-gradient-to-r from-brand-900 via-brand-700 to-purple-600 rounded-3xl p-6 md:p-8 text-white mb-8 shadow-xl relative overflow-hidden flex items-center justify-between">
+            <div class="relative z-10 max-w-lg">
+                <span class="bg-white/20 px-3 py-1 rounded-full text-[11px] font-black tracking-wider uppercase backdrop-blur-md inline-flex items-center gap-1">
+                    <i class="fas fa-bolt text-yellow-300"></i> Hyperlocal Velocity
+                </span>
+                <h1 class="text-3xl md:text-4xl font-black mt-3 mb-2 leading-tight tracking-tight">
+                    Groceries delivered in <span class="text-yellow-300 underline underline-offset-4">10 minutes.</span>
+                </h1>
+                <p class="text-purple-100 text-xs md:text-sm mb-4">
+                    Packed fresh from Vijay Nagar Dark Store #04. Use code <strong class="bg-white text-brand-900 px-2 py-0.5 rounded font-mono font-black ml-1">SWIFT50</strong>
+                </p>
+                <button onclick="filterCategory('produce')" class="bg-yellow-400 hover:bg-yellow-300 text-brand-950 px-5 py-2 rounded-xl text-xs font-black shadow-lg transition-transform active:scale-95">
+                    Order Fresh Veggies <i class="fas fa-arrow-right ml-1"></i>
+                </button>
+            </div>
+            
+            <div class="hidden md:block relative z-10 opacity-80 pr-4">
+                <i class="fas fa-shopping-basket text-[130px] text-white/20 transform -rotate-12"></i>
+            </div>
+
+            <!-- Background subtle glow spheres -->
+            <div class="absolute -bottom-16 -right-16 w-56 h-56 bg-purple-400/30 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -top-16 -left-16 w-56 h-56 bg-brand-500/30 rounded-full blur-3xl pointer-events-none"></div>
+        </div>
+
+        <!-- Horizontal Categories Slider -->
+        <div class="mb-8">
+            <div class="flex items-center justify-between mb-3">
+                <h2 class="text-lg font-black text-gray-900 tracking-tight">Explore Categories</h2>
+                <span class="text-xs text-brand-700 font-bold cursor-pointer hover:underline" onclick="filterCategory('all')">View All</span>
+            </div>
+            <div class="flex overflow-x-auto gap-3.5 hide-scroll pb-2" id="category-container">
+                <!-- Injected via JavaScript -->
+            </div>
+        </div>
+
+        <!-- Search Results / Catalog Title -->
+        <div class="flex items-center justify-between mb-4">
+            <h2 id="search-header" class="text-lg font-black text-gray-900 tracking-tight">All Products</h2>
+            <span class="text-xs text-gray-500 font-medium" id="catalog-count">Showing items</span>
+        </div>
+
+        <!-- Products Dynamic Grid -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5 md:gap-5" id="product-grid">
+            <!-- Injected via JavaScript -->
+        </div>
+
+        <!-- Empty State (When search has 0 matches) -->
+        <div id="empty-state" class="hidden flex-col items-center justify-center py-16 text-gray-400">
+            <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-3">
+                <i class="fas fa-magnifying-glass text-2xl text-gray-300"></i>
+            </div>
+            <p class="text-base font-bold text-gray-700">No matching products found</p>
+            <p class="text-xs mt-1">Try searching for 'Milk', 'Eggs', 'Cola' or 'Bread'</p>
+            <button onclick="resetView()" class="mt-4 px-4 py-1.5 bg-brand-100 text-brand-700 text-xs font-bold rounded-lg hover:bg-brand-200 transition-colors">
+                Reset Catalog
+            </button>
+        </div>
+
+    </main>
+
+    <div id="cart-overlay" class="fixed inset-0 bg-black/60 z-50 hidden backdrop-blur-xs transition-opacity" onclick="if(event.target === this) toggleCart()">
+        <div id="cart-drawer" class="absolute top-0 right-0 w-full max-w-md bg-white h-full shadow-2xl flex flex-col transform translate-x-full transition-transform duration-300 ease-in-out">
+            
+            <!-- Cart Header -->
+            <div class="bg-white px-5 py-4 flex justify-between items-center border-b border-gray-100 shadow-xs z-10">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-brand-50 text-brand-700 flex items-center justify-center font-bold text-sm">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-base font-black text-gray-900 leading-tight">My Basket</h2>
+                        <span class="text-[11px] font-bold text-emerald-600">Dark Store #04 • 10m SLA</span>
+                    </div>
+                </div>
+                <button onclick="toggleCart()" class="text-gray-400 hover:text-gray-800 bg-gray-100 rounded-full w-8 h-8 flex items-center justify-center transition-colors">
+                    <i class="fas fa-times text-xs"></i>
+                </button>
+            </div>
+            
+            <!-- Cart Items Scroll List -->
+            <div class="flex-grow overflow-y-auto p-4 relative" id="cart-items-container">
+                <!-- Empty State UI -->
+                <div id="cart-empty-state" class="absolute inset-0 flex flex-col items-center justify-center text-gray-400 hidden bg-white z-0 p-6 text-center">
+                    <div class="w-20 h-20 bg-purple-50 rounded-full flex items-center justify-center mb-3">
+                        <i class="fas fa-basket-shopping text-3xl text-brand-400"></i>
+                    </div>
+                    <p class="font-extrabold text-gray-800 text-base">Your cart is empty</p>
+                    <p class="text-xs text-gray-500 mt-1">Add items to experience 10-minute instant doorstep fulfillment.</p>
+                    <button onclick="toggleCart()" class="mt-4 bg-brand-700 text-white px-5 py-2 rounded-xl font-bold text-xs hover:bg-brand-800 transition-colors shadow">
+                        Browse Groceries
+                    </button>
+                </div>
+                
+                <!-- Dynamic Items List -->
+                <div id="cart-items-list" class="space-y-3 z-10 relative"></div>
+
+                <!-- Bill Details Section -->
+                <div id="bill-details" class="mt-5 bg-gray-50 p-4 rounded-2xl border border-gray-100 hidden relative z-10">
+                    <h3 class="font-black text-gray-900 mb-3 text-xs uppercase tracking-wider">Bill Summary</h3>
+                    <div class="space-y-2 text-xs text-gray-600 mb-3">
+                        <div class="flex justify-between">
+                            <span>Item Total</span>
+                            <span id="bill-subtotal" class="font-mono font-bold text-gray-900">₹0</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Dark Store Handling Fee</span>
+                            <span class="font-mono font-medium text-gray-700">₹5</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Delivery Partner Fee</span>
+                            <span class="text-emerald-600 font-extrabold">FREE</span>
+                        </div>
+                    </div>
+                    <div class="pt-3 border-t border-gray-200 flex justify-between items-center font-black text-base text-gray-900">
+                        <span>To Pay</span>
+                        <span id="bill-total" class="font-mono text-brand-700 text-lg">₹0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Checkout Action Footer -->
+            <div id="cart-footer" class="bg-white p-4 border-t border-gray-100 hidden shadow-lg">
+                <button onclick="processCheckout()" class="w-full bg-brand-700 hover:bg-brand-800 text-white py-3.5 rounded-2xl font-black text-sm flex justify-between items-center px-5 transition-all shadow-lg shadow-brand-700/30 active:scale-95">
+                    <span id="checkout-btn-amt" class="font-mono text-base">₹0</span>
+                    <span class="flex items-center gap-2">Proceed to Live Tracking <i class="fas fa-chevron-right text-xs"></i></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <button onclick="toggleAI()" class="fixed bottom-6 right-6 bg-slate-900 text-white w-13 h-13 md:w-14 md:h-14 rounded-2xl shadow-2xl flex items-center justify-center hover:scale-105 transition-transform z-30 border-2 border-brand-500 overflow-hidden group" title="Ask Swift AI">
+        <i class="fas fa-wand-magic-sparkles text-xl text-yellow-400 z-10 group-hover:rotate-12 transition-transform"></i>
+    </button>
+
+    <div id="ai-chat" class="fixed bottom-22 right-4 sm:right-6 w-80 sm:w-96 bg-white rounded-3xl shadow-2xl border border-gray-200 flex flex-col hidden z-40 overflow-hidden transition-all">
+        <!-- AI Header -->
+        <div class="bg-slate-950 p-4 text-white flex justify-between items-center border-b border-slate-800">
+            <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-xl bg-brand-600/30 border border-brand-500/40 flex items-center justify-center text-brand-300">
+                    <i class="fas fa-robot text-sm"></i>
+                </div>
+                <div>
+                    <h3 class="font-black text-xs text-white">Swift AI Assistant</h3>
+                    <p class="text-[10px] text-purple-300">Natural language meal & grocery ideas</p>
+                </div>
+            </div>
+            <button onclick="toggleAI()" class="text-slate-400 hover:text-white"><i class="fas fa-times text-xs"></i></button>
+        </div>
+        
+        <!-- Chat Message Log -->
+        <div id="chat-messages" class="h-64 overflow-y-auto p-4 bg-slate-50 space-y-2.5 text-xs">
+            <div class="flex gap-2">
+                <div class="bg-white border border-gray-200 p-3 rounded-2xl rounded-tl-none shadow-xs text-gray-700 leading-relaxed">
+                    Hello! What are you craving or cooking today? Try asking: <em>"Quick morning breakfast"</em> or <em>"Snacks for movie night"</em>.
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Input Bar -->
+        <div class="p-3 bg-white border-t border-gray-100 flex gap-2">
+            <input type="text" id="ai-input" onkeypress="if(event.key === 'Enter') handleAIQuery()" placeholder="What would you like to make?" class="flex-grow bg-gray-100 border-none rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-brand-600 outline-none">
+            <button onclick="handleAIQuery()" class="bg-brand-700 hover:bg-brand-800 text-white w-8 h-8 rounded-xl flex items-center justify-center transition-colors">
+                <i class="fas fa-paper-plane text-xs"></i>
+            </button>
+        </div>
+    </div>
+
+    <footer class="bg-white border-t border-gray-200 pt-10 pb-6 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between gap-8">
+            <div class="max-w-xs">
+                <div class="flex items-center gap-2 mb-3">
+                    <div class="bg-brand-700 text-white w-8 h-8 rounded-xl flex items-center justify-center font-black italic">S</div>
+                    <span class="text-xl font-extrabold text-brand-900 tracking-tight">SwiftCart</span>
+                </div>
+                <p class="text-xs text-gray-500 leading-relaxed">Indore's hyperlocal dark store grocery network. Sub-10 minute doorstep fulfillment with 99.5% shelf inventory accuracy.</p>
+            </div>
+            <div class="flex gap-12 sm:gap-16 text-xs">
+                <div>
+                    <h4 class="font-bold text-gray-900 mb-3 uppercase tracking-wider text-[11px]">Apps & Telemetry</h4>
+                    <ul class="space-y-2 text-gray-600">
+                        <li><a href="rider_tracking.html" class="hover:text-brand-700 font-semibold">Live Rider GPS</a></li>
+                        <li><a href="admin_analytics.html" class="hover:text-brand-700 font-semibold">Admin Operations</a></li>
+                        <li><a href="profile.html" class="hover:text-brand-700 font-semibold">Profile & Orders</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-gray-900 mb-3 uppercase tracking-wider text-[11px]">Categories</h4>
+                    <ul class="space-y-2 text-gray-600">
+                        <li><a href="javascript:void(0)" onclick="filterCategory('dairy')" class="hover:text-brand-700">Dairy & Bread</a></li>
+                        <li><a href="javascript:void(0)" onclick="filterCategory('produce')" class="hover:text-brand-700">Fruits & Vegetables</a></li>
+                        <li><a href="javascript:void(0)" onclick="filterCategory('snacks')" class="hover:text-brand-700">Snacks & Munchies</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 pt-6 border-t border-gray-100 flex flex-wrap justify-between items-center text-xs text-gray-400 gap-2">
+            <p>&copy; 2026 SwiftCart Technologies Pvt Ltd. All rights reserved.</p>
+            <div class="flex gap-3 text-sm text-gray-400">
+                <i class="fab fa-twitter hover:text-brand-600 cursor-pointer"></i>
+                <i class="fab fa-instagram hover:text-brand-600 cursor-pointer"></i>
+                <i class="fab fa-linkedin hover:text-brand-600 cursor-pointer"></i>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Category taxonomy
+        const categories = [
+            { id: 'all', name: 'All Items', icon: 'fa-border-all', color: 'bg-purple-100 text-purple-700' },
+            { id: 'produce', name: 'Fruits & Veg', icon: 'fa-apple-whole', color: 'bg-emerald-100 text-emerald-700' },
+            { id: 'dairy', name: 'Dairy & Bread', icon: 'fa-cheese', color: 'bg-amber-100 text-amber-700' },
+            { id: 'snacks', name: 'Snacks', icon: 'fa-cookie-bite', color: 'bg-orange-100 text-orange-700' },
+            { id: 'drinks', name: 'Beverages', icon: 'fa-bottle-water', color: 'bg-sky-100 text-sky-700' },
+            { id: 'meat', name: 'Eggs & Protein', icon: 'fa-egg', color: 'bg-rose-100 text-rose-700' },
+        ];
+
+        // 12 Realistic Local Store Inventory Products with Fallback URLs
+        const productDB = [
+            { 
+                id: 1, 
+                name: 'Fresh Farm Onions (Pyaz)', 
+                category: 'produce', 
+                weight: '1 kg', 
+                price: 35, 
+                img: 'https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?auto=format&fit=crop&w=400&q=80',
+                fallback: 'https://placehold.co/300x300/f3e5f5/6a1b9a?text=Onion'
+            },
+            { 
+                id: 2, 
+                name: 'Ripe Red Local Tomatoes', 
+                category: 'produce', 
+                weight: '500 g', 
+                price: 25, 
+                img: 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=400&q=80',
+                fallback: 'https://placehold.co/300x300/ffebee/b71c1c?text=Tomato'
+            },
+            { 
+                id: 3, 
+                name: 'Amul Taaza Milk Carton', 
+                category: 'dairy', 
+                weight: '500 ml', 
+                price: 27, 
+                img: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=400&q=80',
+                fallback: 'https://placehold.co/300x300/e0f7fa/006064?text=Milk'
+            },
+            { 
+                id: 4, 
+                name: 'Britannia Whole Wheat Bread', 
+                category: 'dairy', 
+                weight: '400 g', 
+                price: 40, 
+                img: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=400&q=80',
+                fallback: 'https://placehold.co/300x300/fff8e1/ff6f00?text=Bread'
+            },
+            { 
+                id: 5, 
+                name: 'Amul Salted Table Butter', 
+                category: 'dairy', 
+                weight: '100 g', 
+                price: 58, 
+                img: 'https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?auto=format&fit=crop&w=400&q=80',
+                fallback: 'https://placehold.co/300x300/fff9c4/fbc02d?text=Butter'
+            },
+            { 
+                id: 6, 
+                name: 'Brown Farm Fresh Eggs', 
+                category: 'meat', 
+                weight: '6 Pack', 
+                price: 52, 
+                img: 'https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?auto=format&fit=crop&w=400&q=80',
+                fallback: 'https://placehold.co/300x300/fff3e0/e65100?text=Eggs'
+            },
+            { 
+                id: 7, 
+                name: "Lay's India's Magic Masala", 
+                category: 'snacks', 
+                weight: '50 g', 
+                price: 20, 
+                img: 'https://images.unsplash.com/photo-1566478989037-eec170784d0b?auto=format&fit=crop&w=400&q=80',
+                fallback: 'https://placehold.co/300x300/e8eaf6/283593?text=Chips'
+            },
+            { 
+                id: 8, 
+                name: 'Haldiram Ratlami Bhujia Sev', 
+                category: 'snacks', 
+                weight: '200 g', 
+                price: 55, 
+                img: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=400&q=80',
+                fallback: 'https://placehold.co/300x300/ffe0b2/e65100?text=Bhujia'
+            },
+            { 
+                id: 9, 
+                name: 'Coca Cola Chilled Bottle', 
+                category: 'drinks', 
+                weight: '750 ml', 
+                price: 40, 
+                img: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=400&q=80',
+                fallback: 'https://placehold.co/300x300/212121/ffffff?text=Cola'
+            },
+            { 
+                id: 10, 
+                name: 'Fresh Curry Cut Chicken', 
+                category: 'meat', 
+                weight: '500 g', 
+                price: 165, 
+                img: 'https://images.unsplash.com/photo-1604503468506-a8da13d82791?auto=format&fit=crop&w=400&q=80',
+                fallback: 'https://placehold.co/300x300/ffebee/c62828?text=Chicken'
+            },
+            { 
+                id: 11, 
+                name: 'Fresh Robusta Bananas', 
+                category: 'produce', 
+                weight: '6 pcs', 
+                price: 38, 
+                img: 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=400&q=80',
+                fallback: 'https://placehold.co/300x300/fff9c4/f57f17?text=Banana'
+            },
+            { 
+                id: 12, 
+                name: 'Dark Choco Chip Cookies', 
+                category: 'snacks', 
+                weight: '120 g', 
+                price: 35, 
+                img: 'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?auto=format&fit=crop&w=400&q=80',
+                fallback: 'https://placehold.co/300x300/e3f2fd/1565c0?text=Cookies'
+            },
+        ];
+
+        let cart = {}; // { productId: qty }
+        let currentCategory = 'all';
+
+        // Initialize on page load
+        window.onload = function() {
+            renderCategories();
+            renderProducts(productDB);
+            updateCartDrawer();
+        };
+
+        function renderCategories() {
+            const container = document.getElementById('category-container');
+            container.innerHTML = categories.map(cat => `
+                <div onclick="filterCategory('${cat.id}')" class="flex flex-col items-center min-w-[78px] cursor-pointer group">
+                    <div class="w-14 h-14 md:w-16 md:h-16 rounded-2xl ${cat.color} flex items-center justify-center text-xl md:text-2xl mb-1.5 group-hover:scale-105 transition-transform ${currentCategory === cat.id ? 'ring-2 ring-brand-700 ring-offset-2' : ''}">
+                        <i class="fas ${cat.icon}"></i>
+                    </div>
+                    <span class="text-[11px] md:text-xs text-center font-bold text-gray-700 ${currentCategory === cat.id ? 'text-brand-700' : ''}">${cat.name}</span>
+                </div>
+            `).join('');
+        }
+
+        function renderProducts(items) {
+            const container = document.getElementById('product-grid');
+            const emptyState = document.getElementById('empty-state');
+            const countLabel = document.getElementById('catalog-count');
+
+            countLabel.innerText = `${items.length} items available`;
+            
+            if (items.length === 0) {
+                container.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                emptyState.classList.add('flex');
+                return;
+            }
+            
+            emptyState.classList.add('hidden');
+            emptyState.classList.remove('flex');
+
+            container.innerHTML = items.map(p => {
+                const qty = cart[p.id] || 0;
+                
+                let btnHtml = qty === 0 
+                    ? `<button onclick="updateQty(${p.id}, 1)" class="w-full border-2 border-brand-600 text-brand-700 bg-brand-50/50 hover:bg-brand-600 hover:text-white py-1.5 rounded-xl text-xs font-black transition-all">ADD</button>`
+                    : `<div class="flex items-center justify-between bg-brand-700 text-white rounded-xl px-2 py-1 w-full shadow-inner">
+                        <button onclick="updateQty(${p.id}, -1)" class="w-6 h-6 flex items-center justify-center hover:bg-brand-800 rounded active:scale-90"><i class="fas fa-minus text-[10px]"></i></button>
+                        <span class="font-mono font-bold text-xs">${qty}</span>
+                        <button onclick="updateQty(${p.id}, 1)" class="w-6 h-6 flex items-center justify-center hover:bg-brand-800 rounded active:scale-90"><i class="fas fa-plus text-[10px]"></i></button>
+                       </div>`;
+
+                return `
+                    <div class="bg-white rounded-2xl p-3 border border-gray-100 card-hover flex flex-col h-full relative group">
+                        <div class="w-full aspect-square bg-gray-50 rounded-xl mb-2.5 overflow-hidden relative">
+                            <img src="${p.img}" alt="${p.name}" onerror="this.onerror=null; this.src='${p.fallback}'" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                        </div>
+                        <div class="text-[10px] text-brand-600 font-extrabold uppercase tracking-wider mb-0.5 flex items-center gap-1">
+                            <i class="fas fa-stopwatch text-yellow-500"></i> 10 MINS
+                        </div>
+                        <h3 class="text-xs md:text-sm font-bold text-gray-900 leading-tight mb-1 flex-grow line-clamp-2">${p.name}</h3>
+                        <div class="text-[11px] text-gray-400 font-medium mb-3">${p.weight}</div>
+                        <div class="flex items-center justify-between mt-auto gap-2">
+                            <div class="font-black text-gray-900 text-sm font-mono">₹${p.price}</div>
+                            <div class="w-20 shrink-0">${btnHtml}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function filterCategory(id) {
+            currentCategory = id;
+            document.getElementById('search-input').value = '';
+            document.getElementById('search-header').innerText = id === 'all' ? 'All Products' : categories.find(c => c.id === id).name;
+            renderCategories();
+            
+            const filtered = id === 'all' ? productDB : productDB.filter(p => p.category === id);
+            renderProducts(filtered);
+        }
+
+        function handleSearch(e) {
+            const query = e.target.value.toLowerCase().trim();
+            const header = document.getElementById('search-header');
+            
+            if (query === '') {
+                header.innerText = 'All Products';
+                filterCategory('all');
+                return;
+            }
+
+            header.innerText = `Results for "${query}"`;
+            currentCategory = null;
+            renderCategories();
+
+            const filtered = productDB.filter(p => 
+                p.name.toLowerCase().includes(query) || 
+                p.category.toLowerCase().includes(query)
+            );
+            renderProducts(filtered);
+        }
+
+        function resetView() {
+            document.getElementById('search-input').value = '';
+            document.getElementById('search-header').innerText = 'All Products';
+            filterCategory('all');
+        }
+
+        function updateQty(id, delta) {
+            const current = cart[id] || 0;
+            const newQty = current + delta;
+            
+            if (newQty <= 0) {
+                delete cart[id];
+            } else {
+                cart[id] = newQty;
+            }
+            
+            // Re-render current grid
+            const currentQuery = document.getElementById('search-input').value.toLowerCase().trim();
+            if (currentQuery) {
+                renderProducts(productDB.filter(p => p.name.toLowerCase().includes(currentQuery) || p.category.toLowerCase().includes(currentQuery)));
+            } else {
+                const filtered = currentCategory === 'all' ? productDB : productDB.filter(p => p.category === currentCategory);
+                renderProducts(filtered);
+            }
+            
+            updateCartDrawer();
+        }
+
+        function updateCartDrawer() {
+            const itemsContainer = document.getElementById('cart-items-list');
+            const emptyState = document.getElementById('cart-empty-state');
+            const billDetails = document.getElementById('bill-details');
+            const footer = document.getElementById('cart-footer');
+            const navBadge = document.getElementById('nav-cart-badge');
+            const navTotal = document.getElementById('nav-cart-total');
+
+            let subtotal = 0;
+            let totalItems = 0;
+            let html = '';
+
+            for (const [id, qty] of Object.entries(cart)) {
+                const product = productDB.find(p => p.id == id);
+                if (!product) continue;
+                subtotal += product.price * qty;
+                totalItems += qty;
+
+                html += `
+                    <div class="flex items-center gap-3 bg-gray-50 p-3 rounded-2xl border border-gray-100">
+                        <img src="${product.img}" onerror="this.onerror=null; this.src='${product.fallback}'" class="w-12 h-12 rounded-xl object-cover bg-white border border-gray-200">
+                        <div class="flex-grow">
+                            <h4 class="text-xs font-bold text-gray-900 line-clamp-1">${product.name}</h4>
+                            <div class="text-[10px] text-gray-400 font-medium">${product.weight}</div>
+                            <div class="font-black text-brand-700 text-xs mt-0.5 font-mono">₹${product.price * qty}</div>
+                        </div>
+                        <div class="flex flex-col items-end justify-between h-12 w-20 shrink-0">
+                            <button onclick="updateQty(${id}, -${qty})" class="text-gray-400 hover:text-rose-500 transition-colors"><i class="fas fa-trash text-[10px]"></i></button>
+                            <div class="flex items-center justify-between bg-brand-700 text-white rounded-lg w-full px-1.5 py-0.5">
+                                <button onclick="updateQty(${id}, -1)"><i class="fas fa-minus text-[9px]"></i></button>
+                                <span class="text-[11px] font-bold font-mono">${qty}</span>
+                                <button onclick="updateQty(${id}, 1)"><i class="fas fa-plus text-[9px]"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            itemsContainer.innerHTML = html;
+
+            if (totalItems === 0) {
+                emptyState.classList.remove('hidden');
+                billDetails.classList.add('hidden');
+                footer.classList.add('hidden');
+                navBadge.classList.add('hidden');
+                navTotal.innerText = '₹0';
+            } else {
+                emptyState.classList.add('hidden');
+                billDetails.classList.remove('hidden');
+                footer.classList.remove('hidden');
+                
+                navBadge.classList.remove('hidden');
+                navBadge.innerText = totalItems;
+                
+                const handling = 5;
+                const total = subtotal + handling;
+                
+                document.getElementById('bill-subtotal').innerText = `₹${subtotal}`;
+                document.getElementById('bill-total').innerText = `₹${total}`;
+                document.getElementById('checkout-btn-amt').innerText = `₹${total}`;
+                navTotal.innerText = `₹${total}`;
+            }
+        }
+
+        function toggleCart() {
+            const overlay = document.getElementById('cart-overlay');
+            const drawer = document.getElementById('cart-drawer');
+            
+            if (overlay.classList.contains('hidden')) {
+                overlay.classList.remove('hidden');
+                setTimeout(() => drawer.classList.remove('translate-x-full'), 10);
+            } else {
+                drawer.classList.add('translate-x-full');
+                setTimeout(() => overlay.classList.add('hidden'), 300);
+            }
+        }
+
+        // Seamless checkout redirect to Rider Live Tracking
+        function processCheckout() {
+            toggleCart();
+            cart = {};
+            updateCartDrawer();
+            resetView();
+            window.location.href = 'rider_tracking.html';
+        }
+
+        function toggleAI() {
+            const chat = document.getElementById('ai-chat');
+            if (chat.classList.contains('hidden')) {
+                chat.classList.remove('hidden');
+                document.getElementById('ai-input').focus();
+            } else {
+                chat.classList.add('hidden');
+            }
+        }
+
+        function handleAIQuery() {
+            const inputEl = document.getElementById('ai-input');
+            const query = inputEl.value.trim().toLowerCase();
+            if (!query) return;
+
+            const chatArea = document.getElementById('chat-messages');
+            
+            // Render user bubble
+            chatArea.innerHTML += `
+                <div class="flex gap-2 justify-end">
+                    <div class="bg-brand-700 text-white p-2.5 rounded-2xl rounded-tr-none shadow-xs text-xs">
+                        ${inputEl.value}
+                    </div>
+                </div>
+            `;
+            
+            inputEl.value = '';
+            chatArea.scrollTop = chatArea.scrollHeight;
+
+            // Intelligent context matcher
+            setTimeout(() => {
+                let responseText = "Here are matching fresh items from Vijay Nagar Dark Store:";
+                let suggestedIds = [];
+
+                if (query.includes('breakfast') || query.includes('morning') || query.includes('nashta')) {
+                    responseText = "For a nutritious quick breakfast, grab whole wheat bread, eggs, and farm fresh milk:";
+                    suggestedIds = [3, 4, 6];
+                } else if (query.includes('snack') || query.includes('movie') || query.includes('party')) {
+                    responseText = "Movie marathon essentials! Crispy chips, cold cola, and ratlami bhujia:";
+                    suggestedIds = [7, 8, 9];
+                } else if (query.includes('curry') || query.includes('cook') || query.includes('dinner')) {
+                    responseText = "Perfect for a wholesome home meal:";
+                    suggestedIds = [1, 2, 10];
+                } else {
+                    suggestedIds = [1, 3, 7];
+                }
+
+                let html = `
+                    <div class="flex gap-2">
+                        <div class="bg-white border border-gray-200 p-2.5 rounded-2xl rounded-tl-none shadow-xs text-gray-700 w-full">
+                            <p class="mb-2 font-medium">${responseText}</p>
+                            <div class="space-y-1.5">
+                `;
+
+                suggestedIds.forEach(id => {
+                    const product = productDB.find(p => p.id === id);
+                    if (product) {
+                        html += `
+                            <div class="flex items-center justify-between border border-gray-100 rounded-xl p-1.5 bg-gray-50">
+                                <div class="flex items-center gap-2">
+                                    <img src="${product.img}" class="w-7 h-7 rounded-lg object-cover">
+                                    <div>
+                                        <div class="text-[11px] font-bold text-gray-900 line-clamp-1">${product.name}</div>
+                                        <div class="text-[10px] text-gray-500 font-mono">₹${product.price}</div>
+                                    </div>
+                                </div>
+                                <button onclick="updateQty(${id}, 1)" class="text-[10px] font-black border border-brand-600 text-brand-700 px-2 py-0.5 rounded-lg hover:bg-brand-600 hover:text-white transition-colors">ADD</button>
+                            </div>
+                        `;
+                    }
+                });
+
+                html += `</div></div></div>`;
+                chatArea.innerHTML += html;
+                chatArea.scrollTop = chatArea.scrollHeight;
+            }, 500);
+        }
+    </script>
+</body>
+</html>
